@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Brush Identity | 口内性格診断</title>
+    <meta name="description" content="1分で見つける、あなたの口内ソウルメイト診断">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;   /* Dark Blue */
+            --accent-color: #00b894;    /* Greenish Teal */
+            --bg-color: #fdfdfd;        /* Off White */
+            --card-bg: #ffffff;         /* White */
+            --text-color: #333333;
+            --soft-gray: #f1f2f6;
+            --shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .app-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 550px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header & Progress */
+        .header {
+            padding: 20px 30px 0;
+            text-align: center;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            margin-top: 15px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Screens */
+        .screen {
+            flex: 1;
+            padding: 30px;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 26px;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            letter-spacing: 0.05em;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            color: var(--primary-color);
+        }
+
+        p {
+            line-height: 1.8;
+            color: #666;
+            font-size: 15px;
+        }
+
+        /* Start Screen */
+        .hero-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: block;
+            text-align: center;
+        }
+        
+        .start-content {
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 30px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+        }
+
+        /* Question Screen */
+        .section-badge {
+            display: inline-block;
+            background-color: var(--soft-gray);
+            color: #7f8c8d;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid #edf2f7;
+            padding: 18px 20px;
+            border-radius: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            color: #444;
+            width: 100%;
+            margin-bottom: 12px;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent-color);
+            background-color: #f0fdfa;
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        .option-tag {
+            font-weight: bold;
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+
+        /* Loading Screen */
+        .loading-content {
+            text-align: center;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        /* Result Screen */
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 20px;
+        }
+        
+        .result-emoji {
+            font-size: 70px;
+            margin-bottom: 10px;
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .result-type-name {
+            color: var(--accent-color);
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .result-catchphrase {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .result-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+            border: 1px solid #e1e4e8;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .product-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .product-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Mobile Optimization */
+        @media (max-width: 400px) {
+            h1 { font-size: 22px; }
+            h2 { font-size: 18px; }
+            .screen { padding: 20px; }
+            .option-btn { font-size: 14px; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header" id="mainHeader" style="display:none;">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div class="screen active" id="startScreen">
+        <div class="start-content">
+            <span class="hero-icon">🧬</span>
+            <h1>The Brush Identity</h1>
+            <p style="color: var(--accent-color); font-weight:bold; margin-bottom:20px;">口内性格診断</p>
+            <p>
+                毎日使う歯ブラシ、本当にあなたに合っていますか？<br>
+                10個の質問からあなたの無意識のクセと好みを分析し、運命の1本を処方します。
+            </p>
+            <p style="font-size:13px; color:#999; margin-top:30px;">所要時間：約1分 / 全9問</p>
+            <button class="btn-primary" onclick="startQuiz()">診断を始める</button>
+        </div>
+    </div>
+
+    <div class="screen" id="questionScreen">
+        <div class="section-badge" id="sectionBadge">SECTION 1</div>
+        <h2 id="questionText">質問テキスト</h2>
+        <div id="optionsContainer">
+            </div>
+    </div>
+
+    <div class="screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loader"></div>
+            <h3 style="color:var(--primary-color);">分析中...</h3>
+            <p>あなたの回答から<br>最適なパターンを計算しています</p>
+        </div>
+    </div>
+
+    <div class="screen" id="resultScreen">
+        <div class="result-header">
+            <div class="result-emoji" id="rEmoji">🐆</div>
+            <div class="result-type-name" id="rType">URBAN CHEETAH</div>
+            <div class="result-catchphrase" id="rCatch">Time is Gold. あなたの時間は貴重だから。</div>
+        </div>
+
+        <div class="result-box">
+            <p id="rDesc" style="margin:0; font-size:14px;">診断結果の本文がここに入ります。</p>
+        </div>
+
+        <div class="product-card">
+            <span class="product-label">あなたへの処方箋</span>
+            <div class="product-name" id="rProduct">Re:TAN</div>
+            <p id="rProductDesc" style="font-size:13px; color:#666;">効率追求セット</p>
+        </div>
+
+        <button class="btn-primary" onclick="location.reload()" style="width:100%; margin-top:20px; background-color:#95a5a6;">もう一度診断する</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // DATA CONFIGURATION
+    // ==========================================
+    
+    // Types: A=Cheetah(Re:TAN), B=Sloth(airgrip), C=Owl(PRIO), D=Peacock(Hidden)
+    const quizData = [
+        // SECTION 1: Vibe & Lifestyle
+        {
+            section: "SECTION 1: Vibe & Lifestyle",
+            question: "休日の朝、あなたが一番目覚めたいと思う「理想の部屋」は？",
+            options: [
+                { text: "動線が完璧！無駄なものが一切ない、シンプルな部屋", type: "A" },
+                { text: "ふかふかのソファと間接照明がある、癒しの部屋", type: "B" },
+                { text: "チリひとつなく整理整頓された、ガラス張りの綺麗な部屋", type: "C" },
+                { text: "好きな雑貨やアートに囲まれた、秘密基地みたいな部屋", type: "D" }
+            ]
+        },
+        {
+            section: "SECTION 1: Vibe & Lifestyle",
+            question: "お風呂上がり、体を拭くタオルの「肌触り」はこれがベスト！",
+            options: [
+                { text: "吸水性抜群！サッと一拭きで水気が取れるパリッとしたタオル", type: "A" },
+                { text: "肌に優しい〜。雲に包まれているようなふわふわのタオル", type: "B" },
+                { text: "しっかりした生地で、拭き残しがない清潔なコットンタオル", type: "C" },
+                { text: "その日の気分に合わせて、色や素材を変えて楽しみたい", type: "D" }
+            ]
+        },
+        {
+            section: "SECTION 1: Vibe & Lifestyle",
+            question: "普段の買い物で、これだけは絶対に譲れない基準は？",
+            options: [
+                { text: "コスパ・タイパ。価格に見合う性能があり、時間を節約できること", type: "A" },
+                { text: "心地よさ。使っていてストレスがなく、気分が良くなること", type: "B" },
+                { text: "ディテール。細部の作りが完璧で、本来の機能に嘘がないこと", type: "C" },
+                { text: "面白さ。人とは違う、ユニークな体験ができること", type: "D" }
+            ]
+        },
+        // SECTION 2: Functional Audit
+        {
+            section: "SECTION 2: Functional Audit",
+            question: "歯磨きをする時、無意識に出る「手の動き」はどれに近い？",
+            options: [
+                { text: "豪快に大きく！一度に広い範囲を磨きたい", type: "A" },
+                { text: "優しく慎重に。歯茎に当たらないように気をつけて動かしている", type: "B" },
+                { text: "小刻みに細かく！歯を一本ずつ狙って丁寧に磨きたい", type: "C" }
+            ]
+        },
+        {
+            section: "SECTION 2: Functional Audit",
+            question: "奥歯の奥を磨く時、正直どう感じていますか？",
+            options: [
+                { text: "窮屈。ヘッドが分厚くて、頬の内側や骨に当たるのが不快", type: "A" },
+                { text: "疲れる。口を大きく開け続けるのがしんどい", type: "B" },
+                { text: "届かない。ブラシが奥まで入り切らず、磨き残している気がする", type: "C" }
+            ]
+        },
+        {
+            section: "SECTION 2: Functional Audit",
+            question: "今使っている歯ブラシ、「毛先」の状態はどうなっていますか？",
+            options: [
+                { text: "いつ替えたっけ？形は変わっていないけれど、あまり関心がない", type: "A" },
+                { text: "実は…すぐ開いちゃう。2〜3週間で毛先が外側に広がってしまう", type: "B" },
+                { text: "「新品みたい」1ヶ月以上使っても、真っ直ぐで綺麗なまま", type: "C" }
+            ]
+        },
+        {
+            section: "SECTION 2: Functional Audit",
+            question: "歯磨き中に、手や腕がだるくなることはありますか？",
+            options: [
+                { text: "ない。鉛筆を持つみたいに軽く握って、クルクル回している", type: "A" },
+                { text: "あるかも。スマホを見ながら磨いていると、地味に重さを感じる", type: "B" },
+                { text: "気にしたことない。しっかり握り込んでガシガシ磨いている", type: "C" }
+            ]
+        },
+        // SECTION 3: Emotional Needs
+        {
+            section: "SECTION 3: Emotional Needs",
+            question: "この歯ブラシに、ひとつだけ願いを叶えてもらうなら？",
+            options: [
+                { text: "「時短革命」忙しい朝、私の貴重な時間を1分でも節約して", type: "A" },
+                { text: "「究極の癒し」磨いている間だけは、何のストレスもなくリラックスさせて", type: "B" },
+                { text: "「徹底浄化」見えない死角にある汚れまで、完璧に見つけ出して", type: "C" },
+                { text: "「新しい刺激」毎日の単調なルーティンに、ちょっとした楽しさをちょうだい", type: "D" }
+            ]
+        },
+        {
+            section: "SECTION 3: Emotional Needs",
+            question: "洗面所に置くなら、どのオブジェが似合う？",
+            options: [
+                { text: "「Modern Gray」都会的でシックな、無駄のないマットな質感", type: "A" },
+                { text: "「Soft Pastel」角がなくて安心する、優しいパステルカラー", type: "B" },
+                { text: "「Clear & Pure」水のように透明で、清潔感のあるクリスタル", type: "C" },
+                { text: "「Pop & Art」見るたびに元気をくれる、カラフルなアート", type: "D" }
+            ]
+        }
+    ];
+
+    const results = {
+        A: {
+            name: "Urban Cheetah",
+            emoji: "🐆",
+            catch: "Time is Gold. あなたの時間は貴重だから。",
+            desc: "合理的でスマートなあなた。歯磨きも義務ではなく「ミッション」として、手早く完璧にこなしたいはず。<br><br>そんなあなたには、ワイドヘッドと超薄型ヘッドで、痛みを伴わずに最速で磨き上げる<strong>「Re:TAN（リタン）」</strong>が最適です。無駄を削ぎ落としたデザインは、あなたの知的なライフスタイルにフィットします。",
+            product: "Re:TAN（リタン）",
+            prodDesc: "【処方箋】 効率追求セット"
+        },
+        B: {
+            name: "Cloud Sloth",
+            emoji: "🦥",
+            catch: "Don't worry. 痛いのはナシで、リラックスして。",
+            desc: "繊細な感覚を持つあなたは、強い刺激よりも「優しさ」を求めています。<br><br><strong>「airgrip（エアグリップ）」</strong>は、特殊なクッションネックがあなたの力を優しく受け止め、羽のような軽さで手首の疲れも忘れさせてくれます。パステルカラーの優しいデザインに癒されてください。",
+            product: "airgrip（エアグリップ）",
+            prodDesc: "【処方箋】 快適性持続セット"
+        },
+        C: {
+            name: "Crystal Owl",
+            emoji: "🦉",
+            catch: "Perfect Detail. 見えない場所こそ、美しく。",
+            desc: "小さな隙間も許さない完璧主義のあなた。「なんとなく」では満足できませんよね。<br><br>歯科用ツールのように精巧な<strong>「PRIO（プリオ）」</strong>のコンパクトヘッドなら、届きにくい奥歯の裏側まで完全にコントロールできます。嘘のない透明なハンドルは、あなたの誠実さの証です。",
+            product: "PRIO（プリオ）",
+            prodDesc: "【処方箋】 精密清潔セット"
+        },
+        D: {
+            name: "Artistic Peacock",
+            emoji: "🦚",
+            catch: "Find Your Style. 私の『好き』は、私が決める。",
+            desc: "好奇心旺盛でセンスの良いあなたを、一つの型にはめるなんて不可能です。今日はしっかり、明日は優しく。<br><br>その日の気分（Mood）に合わせて使い分ける<strong>「比較体験セット」</strong>こそが正解。毎日違う磨き心地を楽しみながら、あなただけのスタイルを見つけてください。",
+            product: "Hidden Set",
+            prodDesc: "【処方箋】 比較体験セット"
+        }
+    };
+
+    // ==========================================
+    // LOGIC & DOM MANIPULATION
+    // ==========================================
+    
+    let currentQIndex = 0;
+    let scores = { A: 0, B: 0, C: 0, D: 0 };
+
+    const screens = {
+        start: document.getElementById('startScreen'),
+        question: document.getElementById('questionScreen'),
+        loading: document.getElementById('loadingScreen'),
+        result: document.getElementById('resultScreen')
+    };
+
+    const mainHeader = document.getElementById('mainHeader');
+    const progressBar = document.getElementById('progressBar');
+    const sectionBadge = document.getElementById('sectionBadge');
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+
+    function showScreen(name) {
+        Object.values(screens).forEach(s => s.classList.remove('active'));
+        screens[name].classList.add('active');
+    }
+
+    function startQuiz() {
+        currentQIndex = 0;
+        scores = { A: 0, B: 0, C: 0, D: 0 };
+        mainHeader.style.display = 'block';
+        showScreen('question');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = quizData[currentQIndex];
+        
+        // Update Progress
+        const progress = ((currentQIndex) / quizData.length) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // Update Content
+        sectionBadge.textContent = q.section;
+        questionText.textContent = q.question;
+        
+        optionsContainer.innerHTML = '';
+        
+        // Shuffle options slightly for visuals if desired, but kept ordered for logic simplicity here.
+        // Creating buttons
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span class="option-tag">${opt.type}</span> ${opt.text}`;
+            btn.onclick = () => handleAnswer(opt.type);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(type) {
+        scores[type]++;
+        currentQIndex++;
+
+        if (currentQIndex < quizData.length) {
+            renderQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        progressBar.style.width = '100%';
+        showScreen('loading');
+        
+        setTimeout(() => {
+            calculateAndShowResult();
+        }, 1500);
+    }
+
+    function calculateAndShowResult() {
+        // Sort scores to find winner
+        const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+        let winnerType = sortedScores[0][0];
+        
+        // Tie-breaker logic: If Tie, prioritize Peacock (D) as "Mixed Type"
+        if (sortedScores[0][1] === sortedScores[1][1]) {
+            // If D is involved in the tie, D wins. Else, the first one.
+            if (sortedScores[0][0] === 'D' || sortedScores[1][0] === 'D') {
+                winnerType = 'D';
+            }
+        }
+
+        // Render Result
+        const res = results[winnerType];
+        document.getElementById('rEmoji').textContent = res.emoji;
+        document.getElementById('rType').textContent = res.name;
+        document.getElementById('rCatch').textContent = res.catch;
+        document.getElementById('rDesc').innerHTML = res.desc;
+        document.getElementById('rProduct').textContent = res.product;
+        document.getElementById('rProductDesc').textContent = res.prodDesc;
+
+        showScreen('result');
+    }
+</script>
+
+</body>
+</html>
