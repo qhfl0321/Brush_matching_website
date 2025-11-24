@@ -23,6 +23,7 @@
 
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* 모바일 터치 하이라이트 제거 */
         }
 
         body {
@@ -155,6 +156,7 @@
             letter-spacing: 1px;
         }
 
+        /* --- BUTTON STYLE FIX FOR MOBILE --- */
         .option-btn {
             background-color: white;
             border: 2px solid #edf2f7;
@@ -169,18 +171,28 @@
             margin-bottom: 12px;
             position: relative;
             font-weight: 500;
+            /* 모바일 터치 시 깜빡임 방지 */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .option-btn:hover {
-            border-color: var(--accent-color);
-            background-color: #f0fdfa;
-            color: var(--primary-color);
-            transform: translateX(5px);
+        /* PC (마우스가 있는 환경)에서만 호버 효과 적용 */
+        @media (hover: hover) {
+            .option-btn:hover {
+                border-color: var(--accent-color);
+                background-color: #f0fdfa;
+                color: var(--primary-color);
+                transform: translateX(5px);
+            }
         }
-        
+
+        /* 모바일 터치 시 (Active) 효과 */
         .option-btn:active {
+            border-color: var(--accent-color);
+            background-color: #e0f2f1;
             transform: scale(0.98);
+            color: var(--primary-color);
         }
+        /* ----------------------------------- */
 
         .option-tag {
             font-weight: bold;
@@ -522,7 +534,14 @@
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerHTML = `<span class="option-tag">${opt.type}</span> ${opt.text}`;
-            btn.onclick = () => handleAnswer(opt.type);
+            
+            // Prevent double click/tap
+            btn.onclick = function() {
+                // Disable all buttons immediately to prevent multi-touch
+                const allBtns = document.querySelectorAll('.option-btn');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                handleAnswer(opt.type);
+            };
             optionsContainer.appendChild(btn);
         });
     }
@@ -531,11 +550,14 @@
         scores[type]++;
         currentQIndex++;
 
-        if (currentQIndex < quizData.length) {
-            renderQuestion();
-        } else {
-            finishQuiz();
-        }
+        // Delay slightly for visual feedback (active state)
+        setTimeout(() => {
+            if (currentQIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }, 250); 
     }
 
     function finishQuiz() {
